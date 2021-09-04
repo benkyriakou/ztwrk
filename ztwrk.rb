@@ -42,19 +42,35 @@ class ZTWRK
   def load_dir(dir)
     # First load all Ruby files.
     # We have to do this first as these take precedence for creating namespaces.
-    Dir.children(dir).filter { |p| /\.rb$/.match(p) }.each do |file|
-      namespace, element = constant_ref(relpath(File.join(dir, file)).sub(/\.rb$/, '').camelize)
-      namespace.autoload(element, File.join(dir, file))
+    ruby_files(dir).each do |relpath, abspath|
+      namespace, element = constant_ref(relpath.sub(/\.rb$/, '').camelize)
+      namespace.autoload(element, abspath)
     end
 
     # Then load all directories, and recurse into them.
-    Dir.children(dir).filter { |subdir| File.directory?(File.join(dir, subdir)) }.each do |subdir|
-      namespace, element = constant_ref(relpath(File.join(dir, subdir)).camelize)
+    subdirectories(dir).each do |relpath, abspath|
+      namespace, element = constant_ref(relpath.camelize)
 
       # See the Kernel patch and the autovivify method - this doesn't _actually_ load the subdir.
-      namespace.autoload(element, File.join(dir, subdir)) unless namespace.const_defined?(element)
-      load_dir(File.join(dir, subdir))
+      namespace.autoload(element, abspath) unless namespace.const_defined?(element)
+      load_dir(abspath)
     end
+  end
+
+  def ruby_files(dir)
+    Dir.children(dir).filter { |p| /\.rb$/.match(p) }.map do |file|
+      abspath = File.join(dir, file)
+      [relpath(abspath), abspath]
+    end
+  end
+
+  def subdirectories(dir)
+    Dir.children(dir).map do |subdir|
+      abspath = File.join(dir, subdir)
+      next unless File.directory?(abspath)
+
+      [relpath(abspath), abspath]
+    end.compact
   end
 
   def relpath(abspath)
