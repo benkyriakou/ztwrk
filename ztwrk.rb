@@ -1,8 +1,5 @@
 # frozen_string_literal: true
 
-require 'bundler/setup'
-require 'active_support/core_ext/string'
-
 # How this should work:
 #
 # Give it a root directory
@@ -36,7 +33,7 @@ class ZTWRK
   end
 
   def autovivify(abspath)
-    namespace, element = constant_ref(relpath(abspath).camelize)
+    namespace, element = constant_ref(camelize(relpath(abspath)))
     namespace.const_set(element, Module.new)
   end
 
@@ -50,13 +47,13 @@ class ZTWRK
     # First load all Ruby files.
     # We have to do this first as these take precedence for creating namespaces.
     ruby_files(dir).each do |relpath, abspath|
-      namespace, element = constant_ref(relpath.sub(/\.rb$/, '').camelize)
+      namespace, element = constant_ref(camelize(relpath.sub(/\.rb$/, '')))
       namespace.autoload(element, abspath)
     end
 
     # Then load all directories, and recurse into them.
     subdirectories(dir).each do |relpath, abspath|
-      namespace, element = constant_ref(relpath.camelize)
+      namespace, element = constant_ref(camelize(relpath))
 
       # See the Kernel patch and the autovivify method - this doesn't _actually_ load the subdir.
       namespace.autoload(element, abspath) unless namespace.const_defined?(element)
@@ -85,8 +82,15 @@ class ZTWRK
   def constant_ref(camelized_path)
     path_parts = camelized_path.split('::')
     element = path_parts.pop.to_sym
-    namespace = path_parts.empty? ? Object : path_parts.join('::').constantize
+    namespace = path_parts.empty? ? Object : Object.const_get(path_parts.join('::'))
     [namespace, element]
+  end
+
+  def camelize(path)
+    path
+      .split('/')
+      .map { |part| part.split('_').map(&:capitalize).join }
+      .join('::')
   end
 end
 
