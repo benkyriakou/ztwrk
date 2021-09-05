@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require './ztwrk'
+require '../ztwrk'
 
 loader = ZTWRK.new(File.expand_path('lib'))
 loader.setup

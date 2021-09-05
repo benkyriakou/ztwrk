@@ -6,6 +6,6 @@ This is purely exploratory code, and should not be used for anything. It lacks t
 
 What it does have is an extremely simplified representation of Zeitwerk autoloads a directory. It only supports one directory and one autoloader at a time - if you create another autoloader it will just overwrite the first one in `ZTWRK.loader`.
 
-To use, simply include the script, instantiate a loader, and run `setup`. See `example.rb` for more detail.
+To use, simply include the script, instantiate a loader, and run `setup`. See [`example/example.rb`](example/example.rb) for more detail.
 
 This is written without the use of external gems for understandability.
