@@ -76,7 +76,7 @@ class ZTWRK
   end
 
   def relpath(abspath)
-    abspath.gsub(%r{^#{root_dir}/}, '')
+    abspath.gsub(/^#{root_dir}#{File::SEPARATOR}/, '')
   end
 
   def constant_ref(camelized_path)
@@ -88,7 +88,7 @@ class ZTWRK
 
   def camelize(path)
     path
-      .split('/')
+      .split(File::SEPARATOR)
       .map { |part| part.split('_').map(&:capitalize).join }
       .join('::')
   end
