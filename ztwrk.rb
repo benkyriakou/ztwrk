@@ -15,7 +15,7 @@ require 'active_support/core_ext/string'
 #       It should be smart enough to get the right parent namespace if it's not Object
 # No configurability, no error-checking
 class ZTWRK
-  @@loader = false
+  @@loader = nil
 
   def self.loader
     @@loader
