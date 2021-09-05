@@ -1,4 +1,5 @@
-require 'bundler/setup'
+# frozen_string_literal: true
+
 require './ztwrk'
 
 loader = ZTWRK.new('lib')
