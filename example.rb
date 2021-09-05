@@ -2,7 +2,7 @@
 
 require './ztwrk'
 
-loader = ZTWRK.new('lib')
+loader = ZTWRK.new(File.expand_path('lib'))
 loader.setup
 
 Foo.hello

@@ -27,7 +27,7 @@ class ZTWRK
   attr_reader :root_dir
 
   def initialize(root_dir)
-    @root_dir = File.expand_path(root_dir)
+    @root_dir = root_dir
     @@loader = self
   end
 
