@@ -7,13 +7,13 @@ require 'active_support/core_ext/string'
 # Call .setup to start discovery
 # This iterates through the root tree with the following logic:
 #   First get all ruby files
-#   Call parent.autoload
-#     Simple
+#     Call parent.autoload
+#       Simple
 #   Then get all directories
 #     If the namespace doesn't exist yet (i.e. there's no explicit <namespace>.rb) autovivify it for the directory
 #     Call the load function on the directory and recurse
 #       It should be smart enough to get the right parent namespace if it's not Object
-# No configurability, no error-checking.
+# No configurability, no error-checking
 class ZTWRK
   @@loader = false
 
@@ -32,9 +32,13 @@ class ZTWRK
     load_dir(root_dir)
   end
 
-  def autovivify(path)
-    namespace, element = constant_ref(relpath(path).camelize)
+  def autovivify(abspath)
+    namespace, element = constant_ref(relpath(abspath).camelize)
     namespace.const_set(element, Module.new)
+  end
+
+  def can_load?(abspath)
+    abspath.start_with?(root_dir)
   end
 
   private
@@ -86,15 +90,15 @@ end
 module Kernel
   alias_method :original_require, :require
 
-  def require(path)
-    if ZTWRK.loader && path.start_with?(ZTWRK.loader.root_dir) && File.directory?(path)
+  def require(abspath)
+    if ZTWRK.loader&.can_load?(abspath) && File.directory?(abspath)
       # Here we do what Zeitwerk calls 'autovivication' to fake the module.
-      # Basically we stop it trying to load a directory (which is impossible) and instead fake the namespace with
-      # a module.
-      ZTWRK.loader.autovivify(path)
+      # Basically we stop it trying to load a directory (which is impossible) and instead create the namespace with
+      # an empty module.
+      ZTWRK.loader.autovivify(abspath)
       return true
     end
 
-    original_require(path)
+    original_require(abspath)
   end
 end
