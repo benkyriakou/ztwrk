@@ -58,29 +58,27 @@ class ZTWRK
   end
 
   def ruby_files(dir)
-    Dir.children(dir).filter { |p| /\.rb$/.match(p) }.map do |file|
-      abspath = File.join(dir, file)
-      [relpath(abspath), abspath]
-    end
+    Dir.children(dir)
+       .map { |file| File.join(dir, file) }
+       .filter { |abspath| File.extname(abspath) == '.rb' }
+       .map { |abspath| [relpath(abspath), abspath] }
   end
 
   def subdirectories(dir)
-    Dir.children(dir).map do |subdir|
-      abspath = File.join(dir, subdir)
-      next unless File.directory?(abspath)
-
-      [relpath(abspath), abspath]
-    end.compact
+    Dir.children(dir)
+       .map { |subdir| File.join(dir, subdir) }
+       .filter { |abspath| File.directory?(abspath) }
+       .map { |abspath| [relpath(abspath), abspath] }
   end
 
   def relpath(abspath)
-    abspath.gsub(root_dir, '')[1..]
+    abspath.gsub(%r{^#{root_dir}/}, '')
   end
 
   def constant_ref(camelized_path)
     path_parts = camelized_path.split('::')
-    namespace = path_parts.size > 1 ? path_parts[0..-2].join('::').constantize : Object
-    element = path_parts[-1].to_sym
+    element = path_parts.pop.to_sym
+    namespace = path_parts.empty? ? Object : path_parts.join('::').constantize
     [namespace, element]
   end
 end
